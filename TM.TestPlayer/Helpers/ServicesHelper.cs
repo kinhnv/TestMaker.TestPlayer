@@ -26,11 +26,11 @@ namespace TM.TestPlayer.Helpers
         {
             if (url.StartsWith(testPath))
             {
-                return url.Replace(testPath, "http://localhost:40000/api/");
+                return url.Replace(testPath, _configuration["Sevices:Test"]);
             }
             if (url.StartsWith(eventPath))
             {
-                return url.Replace(eventPath, "http://localhost:50000/api/");
+                return url.Replace(eventPath, _configuration["Sevices:Event"]);
             }
             return url;
         }
