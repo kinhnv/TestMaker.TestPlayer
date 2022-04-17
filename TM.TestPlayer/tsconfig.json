@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "noEmitOnError": true,
+    "removeComments": false,
+    "sourceMap": false,
+    "target": "ES6",
+    "outDir": "bin"
+  },
+  "exclude": [
+    "node_modules",
+    "wwwroot/js",
+    "src/sw.ts"
+  ],
+  "include": [
+    "src/ts/**/*"
+  ]
+}
