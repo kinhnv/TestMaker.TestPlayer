@@ -5,7 +5,6 @@ variables:
 stages:
   - build
   - update_github
-  - test
   - update_gitops
 
 before_script:
@@ -27,6 +26,7 @@ update-github:
   stage: update_github
   only:
     - master
+  needs: [build]
   script:
     - ssh git@github.com || true
     - git remote remove origin && git remote add origin $GITHUB_URL
@@ -39,7 +39,7 @@ update-gitops:
   stage: update_gitops
   only:
     - master
-  needs: [update_github]
+  needs: [build]
   script:
     - git clone $GITOPS_URL 
     - cd GitOps
