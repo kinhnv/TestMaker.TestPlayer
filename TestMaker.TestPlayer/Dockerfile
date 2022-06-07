@@ -8,8 +8,8 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 COPY . .
-RUN dotnet restore "Clients/TestMaker.TestPlayer/TestMaker.TestPlayer.csproj"
-WORKDIR "/src/Clients/TestMaker.TestPlayer"
+RUN dotnet restore "TestMaker.TestPlayer/TestMaker.TestPlayer.csproj"
+WORKDIR "/src/TestMaker.TestPlayer"
 RUN dotnet build "TestMaker.TestPlayer.csproj" -c Release -o /app/build
 
 FROM build AS publish
