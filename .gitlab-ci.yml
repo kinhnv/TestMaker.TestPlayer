@@ -1,0 +1,54 @@
+variables:
+  VERSION: "$CI_PIPELINE_ID"
+  ASPNETCORE_ENVIRONMENT: "Production"
+
+stages:
+  - build
+  - update_github
+  - test
+  - update_gitops
+
+before_script:
+  - eval "$(ssh-agent -s)"
+  - cat ~/.ssh/id_rsa | ssh-add - > /dev/null
+  - ssh-keyscan github.com >> ~/.ssh/known_hosts
+  - echo $GITHUB_URL
+
+build:
+  stage: build
+  only:
+    - master
+  script:
+    - docker-compose build
+    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+    - docker-compose push
+
+update-github:
+  stage: update_github
+  only:
+    - master
+  script:
+    - ssh git@github.com || true
+    - git remote remove origin && git remote add origin $GITHUB_URL
+    - git config --global --add safe.directory $(pwd)
+    - git fetch --unshallow $GITHUB_URL || true
+    - git push origin HEAD:master -f
+    - git config --global --unset safe.directory $(pwd) || true
+            
+update-gitops:
+  stage: update_gitops
+  only:
+    - master
+  needs: [update_github]
+  script:
+    - git clone $GITOPS_URL 
+    - cd GitOps
+    - git config --global --add safe.directory $(pwd)
+    - git checkout -b test-maker origin/test-maker
+    - sed -i "s/test-maker.testplayer:[0-9]*/test-maker.testplayer:$VERSION/g" ./setup/testplayer.deployment.yml
+    - git add ./setup/testplayer.deployment.yml
+    - git config --global user.email "kinhnv1801@gmail.com"
+    - git config --global user.name "Nguyen Van Kinh"
+    - git commit -m "change to version $VERSION"
+    - git push origin test-maker
+    - git config --global --unset safe.directory $(pwd) || true
