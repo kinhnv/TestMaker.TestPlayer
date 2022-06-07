@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
-using TM.TestPlayer.Models;
-using TM.TestPlayer.Helpers;
+using TestMaker.TestPlayer.Models;
+using TestMaker.TestPlayer.Helpers;
 using System.Collections.Generic;
 
-namespace TM.TestPlayer.Controllers
+namespace TestMaker.TestPlayer.Controllers
 {
     public class TestPlayerController : Controller
     {

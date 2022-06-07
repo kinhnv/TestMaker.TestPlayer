@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TM.TestPlayer.Models
+namespace TestMaker.TestPlayer.Models
 {
     public class CandidateAnswer
     {

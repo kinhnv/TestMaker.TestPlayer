@@ -2,10 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using TM.TestPlayer.Helpers;
-using TM.TestPlayer.Models;
+using TestMaker.TestPlayer.Helpers;
+using TestMaker.TestPlayer.Models;
 
-namespace TM.TestPlayer.Controllers
+namespace TestMaker.TestPlayer.Controllers
 {
     public class EventsController : Controller
     {

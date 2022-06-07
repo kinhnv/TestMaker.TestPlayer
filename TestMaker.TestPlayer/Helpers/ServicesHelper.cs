@@ -7,7 +7,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TM.TestPlayer.Helpers
+namespace TestMaker.TestPlayer.Helpers
 {
     public class ServicesHelper : IServicesHelper
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TM.TestPlayer.Models
+namespace TestMaker.TestPlayer.Models
 {
     public class ErrorViewModel
     {

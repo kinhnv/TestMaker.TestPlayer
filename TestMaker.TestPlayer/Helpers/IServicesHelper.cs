@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace TM.TestPlayer.Helpers
+namespace TestMaker.TestPlayer.Helpers
 {
     public interface IServicesHelper
     {

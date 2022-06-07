@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Threading.Tasks;
 
-namespace TM.TestPlayer.Controllers
+namespace TestMaker.TestPlayer.Controllers
 {
     public class HomeController : Controller
     {
