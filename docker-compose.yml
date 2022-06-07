@@ -4,4 +4,4 @@ services:
     image: kinhnv1801/test-maker.test-player:${VERSION}
     build:
       context: .
-      dockerfile: ./TestMaker.TestPlayer.Api/Dockerfile  
+      dockerfile: ./TestMaker.TestPlayer/Dockerfile  
