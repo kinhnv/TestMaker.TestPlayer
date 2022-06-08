@@ -26,11 +26,11 @@ namespace TestMaker.TestPlayer.Helpers
         {
             if (url.StartsWith(testPath))
             {
-                return url.Replace(testPath, _configuration["Sevices:Test"]);
+                return url.Replace(testPath, $"{_configuration["Sevices:Test"]}/api/");
             }
             if (url.StartsWith(eventPath))
             {
-                return url.Replace(eventPath, _configuration["Sevices:Event"]);
+                return url.Replace(eventPath, $"{_configuration["Sevices:Event"]}/api/");
             }
             return url;
         }
