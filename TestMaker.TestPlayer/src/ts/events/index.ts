@@ -47,12 +47,12 @@ class EventsController {
                                 Tham gia
                             </a>
                             ${isInServer && navigator.onLine ? ` - 
-                                <a class="btn btn-outline-primary btn-sm js__prepare-candidate"
+                                <!--<a class="btn btn-outline-primary btn-sm js__prepare-candidate"
                                     data-event-code="${prepareData.eventCode}" 
                                     data-candidate-code="${prepareData.candidateCode}" 
                                     style="cursor: pointer">
                                     Tải
-                                </a>` : ''}
+                                </a>-->` : ''}
                         </span>`
             }
 
@@ -72,11 +72,11 @@ class EventsController {
                                 <span class="js__candidates">
                                     ${createCandidateUI(prepareData)}
                                 </span>, 
-                                <a class="btn btn-outline-primary btn-sm js__create-candidate"
+                                <!--<a class="btn btn-outline-primary btn-sm js__create-candidate"
                                     data-event-id="${prepareData.eventId}"
                                     style="cursor: pointer">
                                     Tạo thi sinh mới
-                                </a>
+                                </a>-->
                             </td>
                         </tr>
                     `);
