@@ -5,7 +5,7 @@
         $('.js__do-test').click((event) => {
             var eventCode: string = $('.js__event-code').val().toString();
             var candidateCode: string = $('.js__candidate-code').val().toString();
-            this.setCookie('ACCESS_CODE', eventCode + '_' + candidateCode, 1)
+            this.setCookie('ACCESS_CODE', eventCode + '_' + candidateCode, 1);
 
             location.href = `${location.origin}${this.params.testPlayerUrl}`;
 

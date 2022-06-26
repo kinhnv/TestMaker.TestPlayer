@@ -139,7 +139,7 @@ class TestPlayerController {
                     this.renderCurrentQuestion();
                 });
             });
-            $('.js__summary').click((event) => {
+            $('.js__summary, .js__test-name').click((event) => {
                 this.submitCurrentQuestion().then(() => {
                     location.href = location.href.replace(location.hash, '') + '#summary';
                     this.renderSummary();

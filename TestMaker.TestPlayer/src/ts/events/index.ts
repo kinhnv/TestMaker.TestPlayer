@@ -5,6 +5,7 @@ class EventsController {
         createCandidateUrl: string;
         prepareUrl: string;
         getPublicEventsAndCandidatesUrl: string;
+        testPlayerUrl: string;
     }) {
         this.renderList();
 
@@ -46,8 +47,8 @@ class EventsController {
                                 data-event-code="${prepareData.eventCode}" data-candidate-code="${prepareData.candidateCode}">
                                 Tham gia
                             </a>
-                            ${isInServer && navigator.onLine ? ` - 
-                                <!--<a class="btn btn-outline-primary btn-sm js__prepare-candidate"
+                            ${isInServer && navigator.onLine ? `<!-- - 
+                                <a class="btn btn-outline-primary btn-sm js__prepare-candidate"
                                     data-event-code="${prepareData.eventCode}" 
                                     data-candidate-code="${prepareData.candidateCode}" 
                                     style="cursor: pointer">
@@ -58,6 +59,7 @@ class EventsController {
 
             prepareDataList.forEach(prepareData => {
                 let isPublic = prepareData.eventType == 1;
+                let hasCandidate = !!prepareData.candidateCode;
 
                 if ($(`.js__event-${prepareData.eventCode}`).length) {
                     $(`.js__event-${prepareData.eventCode}`).find('.js__candidates').append(`,${createCandidateUI(prepareData)}`)
@@ -69,14 +71,14 @@ class EventsController {
                                 ${prepareData.eventCode} (${isPublic ? 'Public' : 'Private'})
                             </td>
                             <td style="text-align: left;">
-                                <span class="js__candidates">
+                                ${ hasCandidate ? `<span class="js__candidates">
                                     ${createCandidateUI(prepareData)}
-                                </span>, 
-                                <!--<a class="btn btn-outline-primary btn-sm js__create-candidate"
+                                </span>,` : `` }
+                                <a class="btn btn-outline-primary btn-sm js__create-candidate"
                                     data-event-id="${prepareData.eventId}"
                                     style="cursor: pointer">
                                     Tạo thi sinh mới
-                                </a>-->
+                                </a>
                             </td>
                         </tr>
                     `);
@@ -91,9 +93,9 @@ class EventsController {
             let eventCode = $(event.target).data('event-code');
             let candidateCode = $(event.target).data('candidate-code');
 
-            $('.js__event-code-input').val(eventCode);
-            $('.js__candidate-code-input').val(candidateCode);
-            $('.js__form').submit();
+            this.setCookie('ACCESS_CODE', eventCode + '_' + candidateCode, 1);
+
+            location.href = `${location.origin}${this.params.testPlayerUrl}`;
         });
 
         $('.js__prepare-candidate').click((event) => {
@@ -117,14 +119,18 @@ class EventsController {
 
             $.ajax({
                 method: 'POST',
-                url: this.params.createCandidateUrl,
-                data: {
-                    eventId: eventId
-                }
+                url: `${this.params.createCandidateUrl}?eventId=${eventId}`
             }).then(() => {
                 this.renderList();
             })
         });
+    }
+
+    setCookie(cname, cvalue, exdays) {
+        const d = new Date();
+        d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+        let expires = "expires=" + d.toUTCString();
+        document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
     }
 }
 

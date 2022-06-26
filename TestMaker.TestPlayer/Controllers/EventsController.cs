@@ -85,9 +85,9 @@ namespace TestMaker.TestPlayer.Controllers
         public async Task<IActionResult> CreateCandidate(Guid eventId)
         {
             var candidate = await _servicesHelper
-                .GetAsync<PreparedTest>
+                .PostAsync<PreparedTest>
                 (
-                    $"api/Event/Events/CreateCandidate",
+                    $"api/Event/Events/CreateCandidate", 
                     new Dictionary<string, object>
                     {
                         { "eventId", eventId }
