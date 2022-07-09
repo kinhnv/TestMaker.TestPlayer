@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using TestMaker.Common.Models;
 
 namespace TestMaker.TestPlayer.Helpers
 {
@@ -46,14 +47,17 @@ namespace TestMaker.TestPlayer.Helpers
 
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
-                var result = await response.Content.ReadAsStringAsync();
+                var responseContent = await response.Content.ReadAsStringAsync();
 
-                if (typeof(T) == typeof(string))
+                var result = JsonConvert.DeserializeObject<ApiResult<T>>(responseContent);
+
+                if (result.Code == 200)
                 {
-                    return (T)Convert.ChangeType(result, typeof(T));
+                    return result.Data;
                 }
-
-                return JsonConvert.DeserializeObject<T>(result);
+                else {
+                    throw new Exception(string.Join(",", result.Errors));
+                }
             }
             throw new Exception("");
         }
@@ -73,6 +77,16 @@ namespace TestMaker.TestPlayer.Helpers
             }
 
             var response = await _httpClient.PostAsync(requestUrlAsParams, content);
+
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            var result = JsonConvert.DeserializeObject<ApiResult>(responseContent);
+
+            if (result.Code != 200)
+            {
+                throw new Exception(string.Join(",", result.Errors));
+            }
         }
 
         public async Task<T> PostAsync<T>(string url, Dictionary<string, object> parameters = null, object data = null)
@@ -93,9 +107,17 @@ namespace TestMaker.TestPlayer.Helpers
 
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
-                var result = await response.Content.ReadAsStringAsync();
+                var responseContent = await response.Content.ReadAsStringAsync();
 
-                return JsonConvert.DeserializeObject<T>(result);
+                var result = JsonConvert.DeserializeObject<ApiResult<T>>(responseContent);
+
+                if (result.Code == 200)
+                {
+                    return result.Data;
+                }
+                else {
+                    throw new Exception(string.Join(",", result.Errors));
+                }
             }
             throw new Exception("");
         }
