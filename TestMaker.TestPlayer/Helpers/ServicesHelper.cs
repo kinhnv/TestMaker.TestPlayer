@@ -1,12 +1,17 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using TestMaker.Common.Models;
+using TestMaker.TestPlayer.Models.User;
 
 namespace TestMaker.TestPlayer.Helpers
 {
@@ -14,12 +19,15 @@ namespace TestMaker.TestPlayer.Helpers
     {
         private const string testPath = "api/Test/";
         private const string eventPath = "api/Event/";
+        private const string getTokenPath = "connect/token";
         private readonly IConfiguration _configuration;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly HttpClient _httpClient;
 
-        public ServicesHelper(IConfiguration configuration)
+        public ServicesHelper(IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
             _configuration = configuration;
+            _httpContextAccessor = httpContextAccessor;
             _httpClient = new HttpClient();
         }
 
@@ -33,7 +41,21 @@ namespace TestMaker.TestPlayer.Helpers
             {
                 return url.Replace(eventPath, $"{_configuration["Sevices:Event"]}/api/");
             }
+            if (url == getTokenPath)
+            {
+                return $"{_configuration["Sevices:IdentityServer"]}/{getTokenPath}";
+            }
             return url;
+        }
+
+        private string AccessToken
+        {
+            get
+            {
+                _httpContextAccessor.HttpContext.Request.Cookies.TryGetValue("accessToken", out string accessToken);
+
+                return accessToken;
+            }
         }
 
         public async Task<T> GetAsync<T>(string url, Dictionary<string, object> parameters = null)
@@ -43,7 +65,14 @@ namespace TestMaker.TestPlayer.Helpers
             {
                 requestUrl = $"{GetUrl(url)}?{string.Join("&", parameters.Select(x => $"{x.Key}={x.Value}"))}";
             }
-            var response = await _httpClient.GetAsync(requestUrl);
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri(requestUrl)
+            };
+            request.Headers.TryAddWithoutValidation("Authorization", $"Bearer {AccessToken}");
+
+            var response = await _httpClient.SendAsync(request);
 
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
@@ -70,13 +99,21 @@ namespace TestMaker.TestPlayer.Helpers
                 content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
             }
 
-            var requestUrlAsParams = GetUrl(url);
+            var requestUrl = GetUrl(url);
             if (parameters != null)
             {
-                requestUrlAsParams += $"?{string.Join("&", parameters.Select(x => $"{x.Key}={x.Value}"))}";
+                requestUrl += $"?{string.Join("&", parameters.Select(x => $"{x.Key}={x.Value}"))}";
             }
 
-            var response = await _httpClient.PostAsync(requestUrlAsParams, content);
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Post,
+                RequestUri = new Uri(requestUrl),
+                Content = content
+            };
+            request.Headers.TryAddWithoutValidation("Authorization", $"Bearer {AccessToken}");
+
+            var response = await _httpClient.SendAsync(request);
 
 
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -97,13 +134,20 @@ namespace TestMaker.TestPlayer.Helpers
                 content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
             }
 
-            var requestUrlAsParams = GetUrl(url);
+            var requestUrl = GetUrl(url);
             if (parameters != null)
             {
-                requestUrlAsParams += $"?{string.Join("&", parameters.Select(x => $"{x.Key}={x.Value}"))}";
+                requestUrl += $"?{string.Join("&", parameters.Select(x => $"{x.Key}={x.Value}"))}";
             }
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Post,
+                RequestUri = new Uri(requestUrl),
+                Content = content
+            };
+            request.Headers.TryAddWithoutValidation("Authorization", $"Bearer {AccessToken}");
 
-            var response = await _httpClient.PostAsync(requestUrlAsParams, content);
+            var response = await _httpClient.SendAsync(request);
 
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
@@ -120,6 +164,32 @@ namespace TestMaker.TestPlayer.Helpers
                 }
             }
             throw new Exception("");
+        }
+
+        public async Task<Token> GetTokenAsync(string userName, string password)
+        {
+            if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
+            {
+                return null;
+            }
+
+            var baseUri = GetUrl(getTokenPath);
+
+            var requestToken = new HttpRequestMessage
+            {
+                Method = HttpMethod.Post,
+                RequestUri = new Uri(baseUri),
+                Content = new StringContent($"grant_type=password&username={userName}&password={password}")
+            };
+
+            requestToken.Content.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded") { CharSet = "UTF-8" };
+            requestToken.Headers.TryAddWithoutValidation("Authorization", "Basic dGVzdHBsYXllcjp0ZXN0cGxheWVy");
+
+            var bearerResult = await _httpClient.SendAsync(requestToken);
+            var bearerData = await bearerResult.Content.ReadAsStringAsync();
+            var bearerToken = JsonConvert.DeserializeObject<Token>(bearerData);
+
+            return bearerToken;
         }
     }
 }

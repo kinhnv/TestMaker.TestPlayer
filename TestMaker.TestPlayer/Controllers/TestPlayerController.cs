@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using TestMaker.TestPlayer.Models;
 using TestMaker.TestPlayer.Helpers;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace TestMaker.TestPlayer.Controllers
 {
@@ -35,15 +36,66 @@ namespace TestMaker.TestPlayer.Controllers
                     }
                 );
 
-            var test = await _servicesHelper
+            var originTest = await _servicesHelper
                 .GetAsync<PreparedTest>
                 (
                     $"api/Test/Tests/PrepareTest",
                     new Dictionary<string, object>
                     {
-                        { "testId", candidate.TestId }
+                        { "testId", candidate.TestId },
+                        { "eventContentQuestionType", candidate.EventContentQuestionType }
                     }
                 );
+
+            PreparedTestWithoutRank test = null;
+
+            if (candidate.EventContentQuestionType == 4)
+            {
+                test = new PreparedTestWithoutRank
+                {
+                    TestId = originTest.TestId,
+                    Description = originTest.Description,
+                    Name = originTest.Name,
+                    Sections = originTest.Sections.Select(s =>
+                    {
+                        var count = s.Questions.Count();
+
+                        return new PreparedTestWithoutRank.PreparedSection
+                        {
+                            Name = s.Name,
+                            SectionId = s.SectionId,
+                            Questions = s.Questions.OrderBy(q => q.Rank).Take((int)Math.Round(0.5 * count)).Select(q => new PreparedTestWithoutRank.PreparedSection.PreparedQuestion
+                            {
+                                QuestionId = q.QuestionId,
+                                Type = q.Type,
+                                Media = q.Media,
+                                QuestionAsJson = q.QuestionAsJson
+                            })
+                        };
+                    })
+                };
+            }
+            else
+            {
+                test = new PreparedTestWithoutRank
+                {
+                    TestId = originTest.TestId,
+                    Description = originTest.Description,
+                    Name = originTest.Name,
+                    Sections = originTest.Sections.Select(s => new PreparedTestWithoutRank.PreparedSection
+                    {
+                        Name = s.Name,
+                        SectionId = s.SectionId,
+                        Questions = s.Questions.Select(q => new PreparedTestWithoutRank.PreparedSection.PreparedQuestion
+                        {
+                            QuestionId = q.QuestionId,
+                            Type = q.Type,
+                            Media = q.Media,
+                            QuestionAsJson = q.QuestionAsJson
+                        })
+                    })
+                };
+            }
 
             return new JsonResult(new PreparedData
             {

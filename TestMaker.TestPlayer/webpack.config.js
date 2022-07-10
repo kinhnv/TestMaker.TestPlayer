@@ -5,6 +5,7 @@ module.exports = {
         'js/home': './src/ts/home/index.ts',
         'js/events': './src/ts/events/index.ts',
         'js/testplayer': './src/ts/testplayer/index.ts',
+        'js/login': './src/ts/login/index.ts',
         'sw': './src/sw.ts'
     },
     module: {

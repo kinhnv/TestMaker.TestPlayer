@@ -58,7 +58,7 @@ class EventsController {
             }
 
             prepareDataList.forEach(prepareData => {
-                let isPublic = prepareData.eventType == 1;
+                let isPublic = prepareData.eventScopeType == 1;
                 let hasCandidate = !!prepareData.candidateCode;
 
                 if ($(`.js__event-${prepareData.eventCode}`).length) {
@@ -68,7 +68,7 @@ class EventsController {
                     $('.js__events').append(`
                         <tr class="js__event js__event-${prepareData.eventCode}" data-event-code="${prepareData.eventCode}">
                             <td style="text-align: left; width: 200px; line-height: 30px">
-                                ${prepareData.eventCode} (${isPublic ? 'Public' : 'Private'})
+                                ${isPublic ? prepareData.eventName : prepareData.eventCode} (${ isPublic ? 'Public' : 'Private' })
                             </td>
                             <td style="text-align: left;">
                                 ${ hasCandidate ? `<span class="js__candidates">

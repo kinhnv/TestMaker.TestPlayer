@@ -37,7 +37,7 @@ namespace TestMaker.TestPlayer.Controllers
                 {
                     EventId = candidate.EventId,
                     EventCode = candidate.EventCode,
-                    EventType = candidate.EventType,
+                    EventType = candidate.EventScopeType,
                     CandidateCode = candidate.CandidateCode,
                     CandidateId = candidate.CandidateId,
                     Test = null
@@ -76,7 +76,7 @@ namespace TestMaker.TestPlayer.Controllers
                 EventCode = candidate.EventCode,
                 CandidateId = candidate.CandidateId,
                 CandidateCode = candidate.CandidateCode,
-                EventType = candidate.EventType,
+                EventType = candidate.EventScopeType,
                 Test = test
             });
         }
