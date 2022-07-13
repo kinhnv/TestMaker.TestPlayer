@@ -1,0 +1,7 @@
+version: '3.7'
+services:
+  test-service:
+    image: kinhnv1801/test-maker.test-player:${VERSION}
+    build:
+      context: .
+      dockerfile: ./TestMaker.TestPlayer/Dockerfile  

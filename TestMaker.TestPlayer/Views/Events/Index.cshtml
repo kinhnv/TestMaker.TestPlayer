@@ -1,0 +1,52 @@
+﻿@{
+    ViewData["Title"] = "Events";
+}
+
+<header>
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3" style="position: relative">
+        <a class="btn btn-outline-primary btn-sm"
+           style="cursor: pointer; position: absolute; left: 3px"
+           asp-action="Index" asp-controller="Home">Back</a>
+        <div class="container text-center justify-content-center">
+            <span>Events</span>
+        </div>
+    </nav>
+</header>
+<div class="container">
+    <main role="main" class="pb-3">
+        <div class="text-center">
+            <table class="table table-sm table-bordered">
+                <tbody class="js__events">
+                    <tr>
+                        <!--<td colspan="2">
+                            <span style="display: inline-block">
+                                <input class="js__prepare-event-code-input" placeholder="Event Code" value="JW0BVY3V" style="float: left; margin-right: 5px;"/>
+                                <input class="js__prepare-candidate-code-input" placeholder="Candidate Code" value="HVUMTVEA" style="float: left; margin-right: 5px;"/>
+                                <a class="btn btn-outline-primary btn-sm js__prepare" style="cursor: pointer; float: left; line-height: 20px">
+                                    Tải
+                                </a>
+                                <span style="clear: left; display: block"></span>
+                            </span>
+                        </td>-->
+                    </tr>
+                </tbody>
+            </table>
+            <form style="display: none" class="js__form" asp-action="Index" asp-controller="TestPlayer" method="post">
+                <input class="js__event-code-input" name="eventCode" />
+                <input class="js__candidate-code-input" name="candidateCode" />
+            </form>
+        </div>
+    </main>
+</div>
+
+@section Scripts {
+<script events-params="
+        @JsonConvert.SerializeObject(new
+        {
+            createCandidateUrl = Url.Action("CreateCandidate", "Events"),
+            prepareUrl = Url.Action("Prepare", "Events"),
+            getPublicEventsAndCandidatesUrl = Url.Action("GetPublicEventsAndCandidates", "Events"),
+            testPlayerUrl = Url.Action("Index", "TestPlayer")
+        })"
+        type="text/javascript" src="~/js/events.js"></script>
+}

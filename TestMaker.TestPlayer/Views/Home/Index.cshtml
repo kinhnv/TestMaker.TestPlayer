@@ -1,0 +1,46 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<header>
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3" style="position: relative">
+        <div class="container text-center justify-content-center">
+            <span>Test Player</span>
+        </div>
+        <div style="position: absolute; right: 3px">
+            <a class="btn btn-outline-primary btn-sm js__events"
+               style="float: left; right: 3px"
+               asp-action="Index" asp-controller="Login">Login</a>
+            <a class="btn btn-outline-primary btn-sm js__events"
+               style="float: left;"
+               asp-action="Index" asp-controller="Events">Event</a>
+            <div style="clear: left"></div>
+        </div>
+    </nav>
+</header>
+<div class="container">
+    <main role="main" class="pb-3">
+        <div class="text-center">
+            <div class="col-md-2" style="margin: 0 auto">
+                <div class="form-group">
+                    <label for="email">Event code</label>
+                    <input name="eventCode" type="text" style="text-align: center" class="form-control js__event-code">
+                </div>
+                <div class="form-group">
+                    <label for="pwd">Candidate code</label>
+                    <input name="candidateCode" type="text" style="text-align: center" class="form-control js__candidate-code">
+                </div>
+                <button type="submit" class="btn btn-primary js__login">Làm bài</button>
+            </div>
+        </div>
+    </main>
+</div>
+
+@section Scripts {
+    <script home-params="
+        @JsonConvert.SerializeObject(new 
+        {
+            testPlayerUrl = Url.Action("Index", "TestPlayer")
+        })" 
+        type="text/javascript" src="~/js/home.js"></script>
+}

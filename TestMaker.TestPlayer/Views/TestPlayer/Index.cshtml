@@ -1,0 +1,43 @@
+﻿
+@{
+    ViewData["Title"] = "TestPlayer";
+}
+
+<header>
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3" style="position: relative">
+        <a class="btn btn-outline-primary btn-sm js__prevent-question"
+           style="position: absolute; left: 3px; cursor: pointer; display: none;">Back</a>
+        <div class="container text-center justify-content-center" style="width: calc(100% - 140px);">
+            <span class="js__test-name" style="cursor: pointer">Test</span>
+            <span class="js__section-name"></span>
+        </div>
+        <a class="btn btn-outline-primary btn-sm js__next-question"
+           style="position: absolute; right: 3px; cursor: pointer; display: none;">Next</a>
+        <a class="btn btn-outline-primary btn-sm js__summary"
+           style="position: absolute; right: 3px; cursor: pointer; display: none;">Summary</a>
+        <div class="clearfix"></div>
+    </nav>
+</header>
+<div class="container">
+    <main role="main" class="pb-3">
+        <div>
+            <div class="js__media"></div>
+            <div class="js__container" style="margin: 0px auto;">
+            </div>
+        </div>
+    </main>
+</div>
+
+@section Scripts {
+    <script test-player-params="@JsonConvert.SerializeObject(new
+        {
+            homeUrl = Url.Action("Index", "Home"),
+            getPreparedCandidateByCodeUrl = Url.Action("GetPreparedCandidateByCode"),
+            getAnswerUrl = Url.Action("GetAnswer"),
+            getAnswersUrl = Url.Action("GetAnswers"),
+            submitQuestionUrl = Url.Action("SubmitQuestion"),
+            getCorrectAnswersUrl = Url.Action("GetCorrectAnswers"),
+            submitUrl = Url.Action("Submit"),
+            clearUrl = Url.Action("Clear")
+        })" type="text/javascript" src="~/js/testplayer.js"></script>
+}

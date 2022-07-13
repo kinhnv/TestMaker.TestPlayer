@@ -1,0 +1,65 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <CopyRefAssembliesToPublishDirectory>false</CopyRefAssembliesToPublishDirectory>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="wwwroot_input\**" />
+    <Content Remove="wwwroot_input\**" />
+    <EmbeddedResource Remove="wwwroot_input\**" />
+    <None Remove="wwwroot_input\**" />
+    <TypeScriptCompile Remove="node_modules\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="src\ts\home\index.ts" />
+    <Content Remove="src\ts\testplayer\index.ts" />
+    <Content Remove="src\ts\testplayer\prepared-test.ts" />
+    <Content Remove="src\ts\testplayer\helpers\question.ts" />
+    <Content Remove="src\ts\testplayer\section.ts" />
+    <Content Remove="wwwroot\sw.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="src\ts\login\index.ts" />
+    <None Remove="src\ts\requesthandler\index.ts" />
+    <None Remove="src\ts\events\index.ts" />
+    <None Remove="src\ts\models\prepared-data.ts" />
+    <None Remove="src\ts\testplayer\helpers\blank-filling-question.helper.ts" />
+    <None Remove="src\ts\testplayer\helpers\matching-question.helper.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="5.0.6" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="5.0.2" />
+    <PackageReference Include="TestMaker.Common" Version="6.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\js\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Include="src\ts\login\index.ts" />
+    <TypeScriptCompile Include="src\ts\requesthandler\index.ts" />
+    <TypeScriptCompile Include="src\ts\events\index.ts" />
+    <TypeScriptCompile Include="src\ts\models\prepared-data.ts" />
+    <TypeScriptCompile Include="src\ts\testplayer\helpers\blank-filling-question.helper.ts" />
+    <TypeScriptCompile Include="src\ts\testplayer\helpers\multiple-choice-question.helper.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\ts\models\question.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\ts\testplayer\helpers\matching-question.helper.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\ts\testplayer\helpers\sorting-question.helper.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\sw.ts" />
+  </ItemGroup>
+
+</Project>
