@@ -5,6 +5,7 @@ using TestMaker.TestPlayer.Models;
 using TestMaker.TestPlayer.Helpers;
 using System.Collections.Generic;
 using System.Linq;
+using TestMaker.TestPlayer.Extensions;
 
 namespace TestMaker.TestPlayer.Controllers
 {
@@ -36,65 +37,86 @@ namespace TestMaker.TestPlayer.Controllers
                     }
                 );
 
-            var originTest = await _servicesHelper
-                .GetAsync<PreparedTest>
+            var test = await _servicesHelper
+                .GetAsync<PreparedTestWithoutRank>
                 (
-                    $"api/Test/Tests/PrepareTest",
+                    $"api/Event/Candidates/GetPreparedTestTemp",
                     new Dictionary<string, object>
                     {
-                        { "testId", candidate.TestId },
-                        { "eventContentQuestionType", candidate.EventContentQuestionType }
+                        { "candidateId", candidate.CandidateId }
                     }
                 );
 
-            PreparedTestWithoutRank test = null;
-
-            if (candidate.EventContentQuestionType == 4)
+            if (test == null)
             {
-                test = new PreparedTestWithoutRank
-                {
-                    TestId = originTest.TestId,
-                    Description = originTest.Description,
-                    Name = originTest.Name,
-                    Sections = originTest.Sections.Select(s =>
-                    {
-                        var count = s.Questions.Count();
+                var originTest = await _servicesHelper
+                    .GetAsync<PreparedTest>
+                    (
+                        $"api/Test/Tests/PrepareTest",
+                        new Dictionary<string, object>
+                        {
+                            { "testId", candidate.TestId },
+                            { "eventContentQuestionType", candidate.EventContentQuestionType }
+                        }
+                    );
 
-                        return new PreparedTestWithoutRank.PreparedSection
+                if (candidate.EventContentQuestionType == 4)
+                {
+                    test = new PreparedTestWithoutRank
+                    {
+                        TestId = originTest.TestId,
+                        Description = originTest.Description,
+                        Name = originTest.Name,
+                        Sections = originTest.Sections.Select(s =>
+                        {
+                            var count = s.Questions.Count();
+
+                            return new PreparedTestWithoutRank.PreparedSection
+                            {
+                                Name = s.Name,
+                                SectionId = s.SectionId,
+                                Questions = s.Questions.OrderBy(q => q.Rank).Take((int)Math.Round(0.5 * count)).Select(q => new PreparedTestWithoutRank.PreparedSection.PreparedQuestion
+                                {
+                                    QuestionId = q.QuestionId,
+                                    Type = q.Type,
+                                    Media = q.Media,
+                                    QuestionAsJson = q.QuestionAsJson
+                                })
+                            };
+                        })
+                    };
+                }
+                else
+                {
+                    test = new PreparedTestWithoutRank
+                    {
+                        TestId = originTest.TestId,
+                        Description = originTest.Description,
+                        Name = originTest.Name,
+                        Sections = originTest.Sections.Select(s => new PreparedTestWithoutRank.PreparedSection
                         {
                             Name = s.Name,
                             SectionId = s.SectionId,
-                            Questions = s.Questions.OrderBy(q => q.Rank).Take((int)Math.Round(0.5 * count)).Select(q => new PreparedTestWithoutRank.PreparedSection.PreparedQuestion
+                            Questions = s.Questions.RandomPosition().Select(q => new PreparedTestWithoutRank.PreparedSection.PreparedQuestion
                             {
                                 QuestionId = q.QuestionId,
                                 Type = q.Type,
                                 Media = q.Media,
                                 QuestionAsJson = q.QuestionAsJson
                             })
-                        };
-                    })
-                };
-            }
-            else
-            {
-                test = new PreparedTestWithoutRank
-                {
-                    TestId = originTest.TestId,
-                    Description = originTest.Description,
-                    Name = originTest.Name,
-                    Sections = originTest.Sections.Select(s => new PreparedTestWithoutRank.PreparedSection
-                    {
-                        Name = s.Name,
-                        SectionId = s.SectionId,
-                        Questions = s.Questions.Select(q => new PreparedTestWithoutRank.PreparedSection.PreparedQuestion
-                        {
-                            QuestionId = q.QuestionId,
-                            Type = q.Type,
-                            Media = q.Media,
-                            QuestionAsJson = q.QuestionAsJson
                         })
-                    })
-                };
+                    };
+                }
+
+                await _servicesHelper.PostAsync
+                (
+                    $"api/Event/Candidates/CreatePreparedTestTemp",
+                    new Dictionary<string, object>
+                    {
+                        { "candidateId", candidate.CandidateId }
+                    },
+                    test
+                );
             }
 
             return new JsonResult(new PreparedData
@@ -190,6 +212,29 @@ namespace TestMaker.TestPlayer.Controllers
                        }
                    );
 
+            if (!string.IsNullOrEmpty(AccessToken))
+            {
+                var answers = await _servicesHelper
+                    .GetAsync<IEnumerable<CandidateAnswer>>
+                    (
+                        $"api/Event/Candidates/GetAnswers",
+                        new Dictionary<string, object>
+                        {
+                        { "candidateId", candidateId }
+                        }
+                    );
+
+                if (answers?.Any() == true)
+                {
+                    await _servicesHelper.PostAsync
+                        (
+                            $"api/Test/Tests/SaveAnswers",
+                            null,
+                            answers
+                        );
+                }
+            }
+
             return Ok();
         }
 
@@ -207,6 +252,16 @@ namespace TestMaker.TestPlayer.Controllers
                    );   
 
             return Ok();
+        }
+
+        private string AccessToken
+        {
+            get
+            {
+                HttpContext.Request.Cookies.TryGetValue("accessToken", out string accessToken);
+
+                return accessToken;
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using TestMaker.TestPlayer.Helpers;
 using TestMaker.TestPlayer.Models;
@@ -70,6 +71,18 @@ namespace TestMaker.TestPlayer.Controllers
                     }
                 );
 
+            PreparedTestWithoutRank preparedTestWithoutRank = null;
+
+            if (test != null)
+            {
+                switch (candidate.EventContentQuestionType) {
+                    case 4:
+                        break;
+                    default:
+                        break;
+                }
+            }
+
             return new JsonResult(new PreparedData
             {
                 EventId = candidate.EventId,
@@ -77,7 +90,24 @@ namespace TestMaker.TestPlayer.Controllers
                 CandidateId = candidate.CandidateId,
                 CandidateCode = candidate.CandidateCode,
                 EventType = candidate.EventScopeType,
-                Test = test
+                Test = new PreparedTestWithoutRank
+                {
+                    TestId = test.TestId,
+                    Description = test.Description,
+                    Name = test.Name,
+                    Sections = test.Sections.Select(s => new PreparedTestWithoutRank.PreparedSection
+                    {
+                        SectionId = s.SectionId,
+                        Name = s.Name,
+                        Questions = s.Questions.Select(q => new PreparedTestWithoutRank.PreparedSection.PreparedQuestion
+                        {
+                            Media = q.Media,
+                            QuestionAsJson = q.QuestionAsJson,
+                            QuestionId = q.QuestionId,
+                            Type = q.Type
+                        })
+                    })
+                }
             });
         }
 

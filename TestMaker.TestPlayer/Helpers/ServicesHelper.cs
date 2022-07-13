@@ -58,7 +58,7 @@ namespace TestMaker.TestPlayer.Helpers
             }
         }
 
-        public async Task<T> GetAsync<T>(string url, Dictionary<string, object> parameters = null)
+        public async Task<T?> GetAsync<T>(string url, Dictionary<string, object> parameters = null)
         {
             var requestUrl = GetUrl(url);
             if (parameters != null)
@@ -80,11 +80,12 @@ namespace TestMaker.TestPlayer.Helpers
 
                 var result = JsonConvert.DeserializeObject<ApiResult<T>>(responseContent);
 
-                if (result.Code == 200)
+                if (result.Code == 200 || result.Code == 404)
                 {
                     return result.Data;
                 }
-                else {
+                else
+                {
                     throw new Exception(string.Join(",", result.Errors));
                 }
             }
@@ -126,7 +127,7 @@ namespace TestMaker.TestPlayer.Helpers
             }
         }
 
-        public async Task<T> PostAsync<T>(string url, Dictionary<string, object> parameters = null, object data = null)
+        public async Task<T?> PostAsync<T>(string url, Dictionary<string, object> parameters = null, object data = null)
         {
             HttpContent content = null;
             if (data != null)
