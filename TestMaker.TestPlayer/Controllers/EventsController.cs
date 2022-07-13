@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using TestMaker.TestPlayer.Helpers;
 using TestMaker.TestPlayer.Models;
@@ -37,7 +38,7 @@ namespace TestMaker.TestPlayer.Controllers
                 {
                     EventId = candidate.EventId,
                     EventCode = candidate.EventCode,
-                    EventType = candidate.EventType,
+                    EventType = candidate.EventScopeType,
                     CandidateCode = candidate.CandidateCode,
                     CandidateId = candidate.CandidateId,
                     Test = null
@@ -70,14 +71,43 @@ namespace TestMaker.TestPlayer.Controllers
                     }
                 );
 
+            PreparedTestWithoutRank preparedTestWithoutRank = null;
+
+            if (test != null)
+            {
+                switch (candidate.EventContentQuestionType) {
+                    case 4:
+                        break;
+                    default:
+                        break;
+                }
+            }
+
             return new JsonResult(new PreparedData
             {
                 EventId = candidate.EventId,
                 EventCode = candidate.EventCode,
                 CandidateId = candidate.CandidateId,
                 CandidateCode = candidate.CandidateCode,
-                EventType = candidate.EventType,
-                Test = test
+                EventType = candidate.EventScopeType,
+                Test = new PreparedTestWithoutRank
+                {
+                    TestId = test.TestId,
+                    Description = test.Description,
+                    Name = test.Name,
+                    Sections = test.Sections.Select(s => new PreparedTestWithoutRank.PreparedSection
+                    {
+                        SectionId = s.SectionId,
+                        Name = s.Name,
+                        Questions = s.Questions.Select(q => new PreparedTestWithoutRank.PreparedSection.PreparedQuestion
+                        {
+                            Media = q.Media,
+                            QuestionAsJson = q.QuestionAsJson,
+                            QuestionId = q.QuestionId,
+                            Type = q.Type
+                        })
+                    })
+                }
             });
         }
 

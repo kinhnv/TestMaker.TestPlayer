@@ -17,6 +17,6 @@ namespace TestMaker.TestPlayer.Models
 
         public string CandidateCode { get; set; }
 
-        public PreparedTest Test { get; set; }
+        public PreparedTestWithoutRank Test { get; set; }
     }
 }

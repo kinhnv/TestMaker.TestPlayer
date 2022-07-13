@@ -17,6 +17,7 @@ interface ITestPlayerControllerParams {
     getAnswersUrl: string;
     getCorrectAnswersUrl: string;
     submitUrl: string;
+    saveQuestionResultUrl: string;
     clearUrl: string;
 }
 
@@ -372,7 +373,13 @@ class TestPlayerController {
                             }
                         }
                     })
-                })
+                });
+
+                $.ajax({
+                    method: 'POST',
+                    url: this.params.saveQuestionResultUrl,
+                    data: result
+                });
 
                 $('.js__go-to-question').each((index, element) => {
                     let questionId = $(element).data('question-id');

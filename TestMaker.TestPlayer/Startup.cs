@@ -25,6 +25,7 @@ namespace TestMaker.TestPlayer
         {
             services.AddControllersWithViews();
 
+            services.AddHttpContextAccessor();
             services.AddSingleton<IServicesHelper, ServicesHelper>();
         }
 

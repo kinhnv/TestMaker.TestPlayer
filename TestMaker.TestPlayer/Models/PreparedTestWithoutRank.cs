@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TestMaker.TestPlayer.Models
 {
-    public class PreparedTest
+    public class PreparedTestWithoutRank
     {
         public class PreparedSection
         {
@@ -24,9 +24,6 @@ namespace TestMaker.TestPlayer.Models
 
                 [JsonProperty("questionAsJson")]
                 public string QuestionAsJson { get; set; }
-
-                [JsonProperty("rank")]
-                public double Rank { get; set; }
             }
 
             public Guid SectionId { get; set; }
