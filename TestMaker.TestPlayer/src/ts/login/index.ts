@@ -17,12 +17,15 @@
                 accessToken: string;
                 expiresIn: number;
                 tokenType: string;
+                refreshToken: string;
                 scope: string;
             }) => {
                 if (token) {
-                    this.setCookie('accessToken', token.accessToken, token.expiresIn);
-
+                    alert("Đăng nhập thành công");
                     location.href = `${location.origin}${this.params.homeUrl}`;
+                }
+                else {
+                    alert("Đăng nhập thất bài");
                 }
             })
 

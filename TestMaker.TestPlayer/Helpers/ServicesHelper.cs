@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
@@ -20,15 +21,20 @@ namespace TestMaker.TestPlayer.Helpers
         private const string testPath = "api/Test/";
         private const string eventPath = "api/Event/";
         private const string getTokenPath = "connect/token";
+        private const string ACCESS_TOKEN_KEY = "ACCESS_TOKEN";
+        private const string REFRESH_TOKEN_KEY = "REFRESH_TOKEN";
         private readonly IConfiguration _configuration;
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly HttpClient _httpClient;
+        private readonly IMemoryCache _memoryCache;
 
-        public ServicesHelper(IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+        public ServicesHelper(
+            IConfiguration configuration,
+            IHttpContextAccessor httpContextAccessor,
+            IMemoryCache memoryCache)
         {
             _configuration = configuration;
-            _httpContextAccessor = httpContextAccessor;
             _httpClient = new HttpClient();
+            _memoryCache = memoryCache;
         }
 
         private string GetUrl(string url)
@@ -52,9 +58,61 @@ namespace TestMaker.TestPlayer.Helpers
         {
             get
             {
-                _httpContextAccessor.HttpContext.Request.Cookies.TryGetValue("accessToken", out string accessToken);
+                
+                var check = _memoryCache.TryGetValue(ACCESS_TOKEN_KEY, out string accessToken);
 
-                return accessToken;
+                if (check)
+                {
+                    return accessToken;
+                }
+                else
+                {
+                    if (string.IsNullOrEmpty(RefreshToken))
+                    {
+                        return null;
+                    }
+
+                    var baseUri = GetUrl(getTokenPath);
+
+                    var requestToken = new HttpRequestMessage
+                    {
+                        Method = HttpMethod.Post,
+                        RequestUri = new Uri(baseUri),
+                        Content = new StringContent($"grant_type=refresh_token&refresh_token={RefreshToken}")
+                    };
+
+                    requestToken.Content.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded") { CharSet = "UTF-8" };
+                    requestToken.Headers.TryAddWithoutValidation("Authorization", "Basic dGVzdC1wbGF5ZXI6dGVzdC1wbGF5ZXI=");
+
+                    var bearerResult = _httpClient.Send(requestToken);
+                    var bearerAsJson = bearerResult.Content.ReadAsStringAsync().Result;
+                    var token = JsonConvert.DeserializeObject<Token>(bearerAsJson);
+
+                    if (token.AccessToken != null)
+                        _memoryCache.Set(ACCESS_TOKEN_KEY, token.AccessToken, new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromHours(1)));
+
+                    if (token.RefreshToken != null)
+                        _memoryCache.Set(REFRESH_TOKEN_KEY, token.RefreshToken, new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromDays(15)));
+
+                    return token.RefreshToken;
+                }
+            }
+        }
+
+        private string RefreshToken
+        {
+            get
+            {
+                var check = _memoryCache.TryGetValue(REFRESH_TOKEN_KEY, out string refreshToken);
+
+                if (check)
+                {
+                    return refreshToken;
+                }
+                else
+                {
+                    return null;
+                }
             }
         }
 
@@ -184,13 +242,21 @@ namespace TestMaker.TestPlayer.Helpers
             };
 
             requestToken.Content.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded") { CharSet = "UTF-8" };
-            requestToken.Headers.TryAddWithoutValidation("Authorization", "Basic dGVzdHBsYXllcjp0ZXN0cGxheWVy");
+            requestToken.Headers.TryAddWithoutValidation("Authorization", "Basic dGVzdC1wbGF5ZXI6dGVzdC1wbGF5ZXI=");
 
             var bearerResult = await _httpClient.SendAsync(requestToken);
             var bearerData = await bearerResult.Content.ReadAsStringAsync();
-            var bearerToken = JsonConvert.DeserializeObject<Token>(bearerData);
+            var token = JsonConvert.DeserializeObject<Token>(bearerData);
 
-            return bearerToken;
+            if (token.AccessToken != null)
+            {
+                _memoryCache.Set(ACCESS_TOKEN_KEY, token.AccessToken, TimeSpan.FromHours(1));
+            }
+
+            if (token.RefreshToken != null)
+                _memoryCache.Set(REFRESH_TOKEN_KEY, token.RefreshToken, TimeSpan.FromDays(15));
+
+            return token.AccessToken != null ? token : null;
         }
     }
 }
