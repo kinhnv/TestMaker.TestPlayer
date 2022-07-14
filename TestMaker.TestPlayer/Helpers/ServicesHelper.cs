@@ -25,16 +25,15 @@ namespace TestMaker.TestPlayer.Helpers
         private const string REFRESH_TOKEN_KEY = "REFRESH_TOKEN";
         private readonly IConfiguration _configuration;
         private readonly HttpClient _httpClient;
-        private readonly IMemoryCache _memoryCache;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public ServicesHelper(
             IConfiguration configuration,
-            IHttpContextAccessor httpContextAccessor,
-            IMemoryCache memoryCache)
+            IHttpContextAccessor httpContextAccessor)
         {
             _configuration = configuration;
             _httpClient = new HttpClient();
-            _memoryCache = memoryCache;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         private string GetUrl(string url)
@@ -59,7 +58,7 @@ namespace TestMaker.TestPlayer.Helpers
             get
             {
                 
-                var check = _memoryCache.TryGetValue(ACCESS_TOKEN_KEY, out string accessToken);
+                var check = _httpContextAccessor.HttpContext.Request.Cookies.TryGetValue(ACCESS_TOKEN_KEY, out string accessToken);
 
                 if (check)
                 {
@@ -89,12 +88,22 @@ namespace TestMaker.TestPlayer.Helpers
                     var token = JsonConvert.DeserializeObject<Token>(bearerAsJson);
 
                     if (token.AccessToken != null)
-                        _memoryCache.Set(ACCESS_TOKEN_KEY, token.AccessToken, new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromHours(1)));
+                    {
+                        _httpContextAccessor.HttpContext.Response.Cookies.Append(ACCESS_TOKEN_KEY, token.AccessToken, new CookieOptions
+                        {
+                            Expires = DateTimeOffset.UtcNow.AddHours(7).AddHours(1)
+                        });
+                    }
 
                     if (token.RefreshToken != null)
-                        _memoryCache.Set(REFRESH_TOKEN_KEY, token.RefreshToken, new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromDays(15)));
+                    {
+                        _httpContextAccessor.HttpContext.Response.Cookies.Append(REFRESH_TOKEN_KEY, token.RefreshToken, new CookieOptions
+                        {
+                            Expires = DateTimeOffset.UtcNow.AddHours(7).AddDays(15)
+                        });
+                    }
 
-                    return token.RefreshToken;
+                    return token.AccessToken;
                 }
             }
         }
@@ -103,7 +112,7 @@ namespace TestMaker.TestPlayer.Helpers
         {
             get
             {
-                var check = _memoryCache.TryGetValue(REFRESH_TOKEN_KEY, out string refreshToken);
+                var check = _httpContextAccessor.HttpContext.Request.Cookies.TryGetValue(REFRESH_TOKEN_KEY, out string refreshToken);
 
                 if (check)
                 {
@@ -250,11 +259,19 @@ namespace TestMaker.TestPlayer.Helpers
 
             if (token.AccessToken != null)
             {
-                _memoryCache.Set(ACCESS_TOKEN_KEY, token.AccessToken, TimeSpan.FromHours(1));
+                _httpContextAccessor.HttpContext.Response.Cookies.Append(ACCESS_TOKEN_KEY, token.AccessToken, new CookieOptions
+                {
+                    Expires = DateTimeOffset.UtcNow.AddHours(7).AddHours(1)
+                });
             }
 
             if (token.RefreshToken != null)
-                _memoryCache.Set(REFRESH_TOKEN_KEY, token.RefreshToken, TimeSpan.FromDays(15));
+            {
+                _httpContextAccessor.HttpContext.Response.Cookies.Append(REFRESH_TOKEN_KEY, token.RefreshToken, new CookieOptions
+                {
+                    Expires = DateTimeOffset.UtcNow.AddHours(7).AddDays(15)
+                });
+            }
 
             return token.AccessToken != null ? token : null;
         }

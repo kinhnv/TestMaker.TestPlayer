@@ -18,7 +18,7 @@
 <div class="container">
     <main role="main" class="pb-3">
         <div class="text-center">
-            <div class="col-md-2" style="margin: 0 auto">
+            <form asp-action="Index" asp-controller="Login" method="post" class="col-md-2" style="margin: 0 auto">
                 <div class="form-group">
                     <label for="email">Tài khoản</label>
                     <input asp-for="UserName" type="text" style="text-align: center" class="form-control js__user-name">
@@ -28,17 +28,7 @@
                     <input asp-for="Password" as type="password" style="text-align: center" class="form-control js__password">
                 </div>
                 <button type="submit" class="btn btn-primary js__login">Đăng nhập</button>
-            </div>
+            </form>
         </div>
     </main>
 </div>
-
-@section Scripts {
-    <script login-params="
-        @JsonConvert.SerializeObject(new 
-        {
-            loginUrl = Url.Action("Index", "Login"),
-            homeUrl = Url.Action("Index", "Home")
-        })" 
-        type="text/javascript" src="~/js/login.js"></script>
-}
