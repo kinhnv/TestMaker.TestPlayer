@@ -6,6 +6,10 @@ namespace TestMaker.TestPlayer.Helpers
 {
     public interface IServicesHelper
     {
+        string AccessToken { get; }
+
+        string RefreshToken { get; }
+
         Task<T?> GetAsync<T>(string url, Dictionary<string, object> parameters = null);
 
         Task PostAsync(string url, Dictionary<string, object> parameters = null, object data = null);

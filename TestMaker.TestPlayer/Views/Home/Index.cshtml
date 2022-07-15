@@ -5,15 +5,26 @@
 <header>
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3" style="position: relative">
         <div class="container text-center justify-content-center">
-            <span>Test Player</span>
+            <span>Bài kiểm tra</span>
         </div>
         <div style="position: absolute; right: 3px">
-            <a class="btn btn-outline-primary btn-sm js__events"
-               style="float: left; right: 3px"
-               asp-action="Index" asp-controller="Login">Login</a>
+            @if (string.IsNullOrEmpty(ViewBag.FirstName))
+            {
+                <a class="btn btn-outline-primary btn-sm js__login"
+                   style="float: left; right: 3px"
+                   asp-action="Index" asp-controller="Login">Đăng nhập</a>
+            }
+            else
+            {
+                <p style="float: left; margin-right: 3px; margin-bottom: 0px; margin-top: 3px;">@ViewBag.FirstName</p>
+                <a class="btn btn-outline-primary btn-sm js__login"
+                   style="float: left; margin-right: 3px"
+                   asp-action="Index" asp-controller="Login">Đăng xuất</a>
+            }
+
             <a class="btn btn-outline-primary btn-sm js__events"
                style="float: left;"
-               asp-action="Index" asp-controller="Events">Event</a>
+               asp-action="Index" asp-controller="Events">Danh sách</a>
             <div style="clear: left"></div>
         </div>
     </nav>

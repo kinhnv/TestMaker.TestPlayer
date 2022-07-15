@@ -23,7 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="src\ts\login\index.ts" />
     <None Remove="src\ts\requesthandler\index.ts" />
     <None Remove="src\ts\events\index.ts" />
     <None Remove="src\ts\models\prepared-data.ts" />
@@ -42,7 +41,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <TypeScriptCompile Include="src\ts\login\index.ts" />
     <TypeScriptCompile Include="src\ts\requesthandler\index.ts" />
     <TypeScriptCompile Include="src\ts\events\index.ts" />
     <TypeScriptCompile Include="src\ts\models\prepared-data.ts" />
