@@ -294,9 +294,8 @@ class TestPlayerController {
                         </div>
                     </div>
                     <div style="text-align: center">
-                        <a class="btn btn-light js__mark-question" style="cursor: pointer">Mark</a>
-                        <a class="btn btn-light js__submit" style="cursor: pointer">Submit</a>
-                        <a class="btn btn-light js__clear" style="cursor: pointer">Clear</a>
+                        <a class="btn btn-light js__submit" style="cursor: pointer">Nộp bài kiểm tra</a>
+                        <a class="btn btn-light js__close" style="cursor: pointer">Thoát bài kiếm tra</a>
                     </div>`
             });
             this.$ContentElement.html(html);
@@ -307,8 +306,8 @@ class TestPlayerController {
                 this.renderCurrentQuestion();
             });
 
-            $('.js__mark-question').click((event) => {
-                this.mark();
+            $('.js__close').click((event) => {
+                location.href = this.params.homeUrl
             });
 
             $('.js__submit').click((event) => {
@@ -319,20 +318,7 @@ class TestPlayerController {
                         candidateId: this.candidateId
                     }
                 }).then(() => {
-                    location.href = this.params.homeUrl
-                })
-            });
-
-            $('.js__clear').click((event) => {
-                $.ajax({
-                    method: 'POST',
-                    url: this.params.clearUrl,
-                    data: {
-                        candidateId: this.candidateId
-                    }
-                }).then(() => {
-                    let url = new URL(location.href);
-                    location.href = url.href.replace(url.hash, '');
+                    this.mark();
                 })
             });
         })

@@ -20,15 +20,18 @@ namespace TestMaker.TestPlayer.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Index([FromForm]LoginRequest request)
+        public async Task<IActionResult> Index(LoginRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return Ok(request);
+            }
             var token = await _servicesHelper.GetTokenAsync(request.UserName, request.Password);
             if (token == null)
             {
-                return Ok(null);
+                return View(request);
             }
-
-            return Ok(token);
+            return RedirectToAction("Index", "Home");
         }
     }
 }
