@@ -20,11 +20,14 @@ namespace TestMaker.TestPlayer.Controllers
         {
             ViewBag.FirstName = string.Empty;
 
-            var user = await _servicesHelper.GetAsync<User>("api/User/Profile");
-
-            if (user != null)
+            if (_servicesHelper.AccessToken != null)
             {
-                ViewBag.FirstName = user.FirstName;
+                var user = await _servicesHelper.GetAsync<User>("api/User/Profile");
+
+                if (user != null)
+                {
+                    ViewBag.FirstName = user.FirstName;
+                }
             }
 
             Response.Cookies.Delete("EventCode");

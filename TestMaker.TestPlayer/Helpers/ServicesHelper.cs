@@ -58,7 +58,7 @@ namespace TestMaker.TestPlayer.Helpers
             return url;
         }
 
-        private string AccessToken
+        public string AccessToken
         {
             get
             {
@@ -113,7 +113,7 @@ namespace TestMaker.TestPlayer.Helpers
             }
         }
 
-        private string RefreshToken
+        public string RefreshToken
         {
             get
             {
