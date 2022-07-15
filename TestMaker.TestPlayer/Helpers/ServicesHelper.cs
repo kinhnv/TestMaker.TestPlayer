@@ -20,6 +20,7 @@ namespace TestMaker.TestPlayer.Helpers
     {
         private const string testPath = "api/Test/";
         private const string eventPath = "api/Event/";
+        private const string userPath = "api/User/";
         private const string getTokenPath = "connect/token";
         private const string ACCESS_TOKEN_KEY = "ACCESS_TOKEN";
         private const string REFRESH_TOKEN_KEY = "REFRESH_TOKEN";
@@ -46,6 +47,10 @@ namespace TestMaker.TestPlayer.Helpers
             if (url.StartsWith(eventPath))
             {
                 return url.Replace(eventPath, $"{_configuration["Sevices:Event"]}/api/");
+            }
+            if (url.StartsWith(userPath))
+            {
+                return url.Replace(userPath, $"{_configuration["Sevices:User"]}/api/");
             }
             if (url == getTokenPath)
             {
