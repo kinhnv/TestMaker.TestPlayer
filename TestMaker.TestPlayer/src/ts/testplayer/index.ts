@@ -1,4 +1,4 @@
-﻿import { IPreparedQuestion, IQuestionHelper, QuestionType } from '../models/question';
+﻿import { CandidateAnswerStatus, ICandidateAnswer, IPreparedQuestion, IQuestionHelper, QuestionType } from '../models/question';
 import { SortingQuestionHelper } from './helpers/sorting-question.helper';
 import { MultipleChoiceQuestionHelper } from './helpers/multiple-choice-question.helper';
 import { IPreparedTest } from '../models/prepared-test';
@@ -117,6 +117,7 @@ class TestPlayerController {
                 }
             }).then((data: IPreparedData) => {
                 this.data = data;
+                console.log(data.eventMarkingType);
                 if (data) {
                     $('.js__test-name').html(data.test.name);
                     if (this.isSummary) {
@@ -199,20 +200,32 @@ class TestPlayerController {
             }
         }
 
-        this.getCurrentAnswerFromServer().then(answerAsJson => {
+        this.questionHelper.addChangeEvent(event => {
+            return new Promise((resole, reject) => {
+                if (this.data.eventMarkingType == 2) {
+                    $('.js__submit-question').show();
+                }
+
+                resole(null);
+            })
+        });
+
+        this.getCurrentAnswerFromServer().then(candidateAnswer => {
             if (currentQuestion.media) {
                 $('.js__media').html(`
-                <audio controls>
-                  <source src="${currentQuestion.media}" type="audio/mpeg">
-                Your browser does not support the audio element.
-                </audio>
-            `);
+                    <audio controls>
+                      <source src="${currentQuestion.media}" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                    </audio>
+                `);
             }
-            this.questionHelper.renderQuestion(answerAsJson);
+            if (candidateAnswer.status != CandidateAnswerStatus.Done) {
+            }
+            this.questionHelper.renderQuestion(candidateAnswer);
         })
     }
 
-    private getCurrentAnswerFromServer(): Promise<string> {
+    private getCurrentAnswerFromServer(): Promise<ICandidateAnswer> {
         return new Promise((resolve, reject) => {
             $.ajax({
                 method: 'GET',

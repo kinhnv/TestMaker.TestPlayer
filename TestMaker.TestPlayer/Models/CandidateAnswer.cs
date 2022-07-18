@@ -11,5 +11,7 @@ namespace TestMaker.TestPlayer.Models
         public Guid QuestionId { get; set; }
 
         public string AnswerAsJson { get; set; }
+
+        public int Status { get; set; }
     }
 }

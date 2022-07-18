@@ -6,15 +6,19 @@
 <header>
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3" style="position: relative">
         <a class="btn btn-outline-primary btn-sm js__prevent-question"
-           style="position: absolute; left: 3px; cursor: pointer; display: none;">Back</a>
+           style="position: absolute; left: 3px; cursor: pointer; display: none;">Câu trước</a>
         <div class="container text-center justify-content-center" style="width: calc(100% - 140px);">
             <span class="js__test-name" style="cursor: pointer">Test</span>
             <span class="js__section-name"></span>
         </div>
-        <a class="btn btn-outline-primary btn-sm js__next-question"
-           style="position: absolute; right: 3px; cursor: pointer; display: none;">Next</a>
-        <a class="btn btn-outline-primary btn-sm js__summary"
-           style="position: absolute; right: 3px; cursor: pointer; display: none;">Summary</a>
+        <div style="position: absolute; right: 3px">
+            <a class="btn btn-outline-primary btn-sm js__submit-question"
+               style="cursor: pointer; display: none;">Nộp</a>
+            <a class="btn btn-outline-primary btn-sm js__next-question"
+               style="cursor: pointer; display: none;">Câu tiếp</a>
+            <a class="btn btn-outline-primary btn-sm js__summary"
+               style="cursor: pointer; display: none;">Tổng hợp</a>
+        </div>
         <div class="clearfix"></div>
     </nav>
 </header>

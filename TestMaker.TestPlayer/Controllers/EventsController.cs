@@ -38,7 +38,8 @@ namespace TestMaker.TestPlayer.Controllers
                 {
                     EventId = candidate.EventId,
                     EventCode = candidate.EventCode,
-                    EventType = candidate.EventScopeType,
+                    EventScopeType = candidate.EventScopeType,
+                    EventMarkingType = candidate.EventMarkingType,
                     CandidateCode = candidate.CandidateCode,
                     CandidateId = candidate.CandidateId,
                     Test = null
@@ -89,7 +90,7 @@ namespace TestMaker.TestPlayer.Controllers
                 EventCode = candidate.EventCode,
                 CandidateId = candidate.CandidateId,
                 CandidateCode = candidate.CandidateCode,
-                EventType = candidate.EventScopeType,
+                EventScopeType = candidate.EventScopeType,
                 Test = new PreparedTestWithoutRank
                 {
                     TestId = test.TestId,

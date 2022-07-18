@@ -125,6 +125,8 @@ namespace TestMaker.TestPlayer.Controllers
                 EventCode = candidate.EventCode,
                 CandidateId = candidate.CandidateId,
                 CandidateCode = candidate.CandidateCode,
+                EventScopeType = candidate.EventScopeType,
+                EventMarkingType = candidate.EventMarkingType,
                 Test = test
             });
         }
@@ -133,17 +135,17 @@ namespace TestMaker.TestPlayer.Controllers
         [Route("GetAnswer")]
         public async Task<IActionResult> GetAnswerAsync(Guid candidateId, Guid questionId)
         {
-            var answerAsJson = await _servicesHelper.GetAsync<String>
-                   (
-                       $"api/Event/Candidates/GetAnswer",
-                       new Dictionary<string, object>
-                       {
-                        { "candidateId", candidateId },
-                        { "questionId", questionId }
-                       }
-                   );
+            var candidateAnswer = await _servicesHelper.GetAsync<CandidateAnswer>
+            (
+                $"api/Event/Candidates/GetAnswer",
+                new Dictionary<string, object>
+                {
+                    { "candidateId", candidateId },
+                    { "questionId", questionId }
+                }
+            );
 
-            return Ok(answerAsJson);
+            return Ok(candidateAnswer);
         }
 
         [HttpGet]
