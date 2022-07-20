@@ -1,4 +1,4 @@
-﻿import { IPreparedQuestion, IQuestionHelper, QuestionType } from '../models/question';
+﻿import { CandidateAnswerStatus, ICandidateAnswer, IPreparedQuestion, IQuestionHelper, QuestionType } from '../models/question';
 import { SortingQuestionHelper } from './helpers/sorting-question.helper';
 import { MultipleChoiceQuestionHelper } from './helpers/multiple-choice-question.helper';
 import { IPreparedTest } from '../models/prepared-test';
@@ -19,6 +19,7 @@ interface ITestPlayerControllerParams {
     submitUrl: string;
     saveQuestionResultUrl: string;
     clearUrl: string;
+    getCandidateUrl: string;
 }
 
 class TestPlayerController {
@@ -128,6 +129,12 @@ class TestPlayerController {
                 }
             });
 
+            $('.js__submit-question').click((event) => {
+                this.submitCurrentQuestion().then(() => {
+                    this.renderCurrentQuestion();
+                    $('.js__submit-question').hide();
+                });
+            });
             $('.js__next-question').click((event) => {
                 this.submitCurrentQuestion().then(() => {
                     location.href = this.getQuestionHerf(this.nextQuestion.questionId);
@@ -199,20 +206,47 @@ class TestPlayerController {
             }
         }
 
-        this.getCurrentAnswerFromServer().then(answerAsJson => {
+        this.questionHelper.addChangeEvent(event => {
+            return new Promise((resole, reject) => {
+                if (this.data.eventMarkingType == 2) {
+                    $('.js__submit-question').show();
+                }
+
+                resole(null);
+            })
+        });
+
+        this.questionHelper.addChangeEvent((event) => {
+            return new Promise((resole, reject) => {
+                var currentStatus = $('.js__question-status').attr('question-status');
+                if (currentStatus == 'seen') {
+                    currentStatus = 'doing';
+                }
+                $('.js__question-status').attr('question-status', currentStatus);
+            });
+        });
+
+        this.getCurrentAnswerFromServer().then(candidateAnswer => {
             if (currentQuestion.media) {
                 $('.js__media').html(`
-                <audio controls>
-                  <source src="${currentQuestion.media}" type="audio/mpeg">
-                Your browser does not support the audio element.
-                </audio>
-            `);
+                    <audio controls>
+                      <source src="${currentQuestion.media}" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                    </audio>
+                `);
             }
-            this.questionHelper.renderQuestion(answerAsJson);
+
+            var questionStatus = candidateAnswer.status == 0 ? 'seen' :
+                candidateAnswer.status == 1 || candidateAnswer.status == 3 ? 'doing' :
+                    candidateAnswer.status == 2 ? 'marked' : '';
+
+            $('.js__question-status').attr('question-status', questionStatus);
+
+            this.questionHelper.renderQuestion(candidateAnswer);
         })
     }
 
-    private getCurrentAnswerFromServer(): Promise<string> {
+    private getCurrentAnswerFromServer(): Promise<ICandidateAnswer> {
         return new Promise((resolve, reject) => {
             $.ajax({
                 method: 'GET',
@@ -228,6 +262,8 @@ class TestPlayerController {
     }
 
     private submitCurrentQuestion(): Promise<void> {
+        var questionStatus = $('.js__question-status').attr('question-status');
+
         return new Promise<void>((resolve, reject) => {
             let answer = this.getCurrentAnswerAsJson();
             if (answer) {
@@ -237,7 +273,11 @@ class TestPlayerController {
                     data: {
                         candidateId: this.candidateId,
                         questionId: this.currentQuestion.questionId,
-                        answerAsJson: answer
+                        answerAsJson: answer,
+                        candidateAnswerStatus: questionStatus == 'seen' ? 1 :
+                            questionStatus == 'doing' ? 3 :
+                                questionStatus == 'marked' ? 2 : null,
+                        marking: this.data.eventMarkingType == 2 ? true : false
                     }
                 }).then(() => {
                     resolve()

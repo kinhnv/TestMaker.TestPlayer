@@ -1,6 +1,8 @@
-﻿import { IPreparedQuestion, IQuestionHelper } from '../../models/question';
+﻿import { ICandidateAnswer, IPreparedQuestion, IQuestionHelper } from '../../models/question';
 
 export class BlankFillingQuestionHelper implements IQuestionHelper {
+    changeEventFunctions: ((event: JQuery.ChangeEvent<HTMLElement, null, HTMLElement, HTMLElement>) => Promise<any>)[] = [];
+
     get questionContent(): {
         question: string;
         blanks: {
@@ -28,11 +30,11 @@ export class BlankFillingQuestionHelper implements IQuestionHelper {
             </select>`;
     }
 
-    renderQuestion(answerAsJson: string) {
+    renderQuestion(candidateAnswer: ICandidateAnswer) {
         const answers: {
             position: string;
             answer: string;
-        }[] = !answerAsJson ? null : JSON.parse(answerAsJson);
+        }[] = !candidateAnswer.answerAsJson ? null : JSON.parse(candidateAnswer.answerAsJson);
         let question = this.questionContent.question;
         this.questionContent.blanks.forEach(blank => {
             let select = this.getSelectAtHtml(blank, !answers ? null : answers.find(a => a.position == blank.position).answer);
@@ -47,6 +49,11 @@ export class BlankFillingQuestionHelper implements IQuestionHelper {
             </div>
         `)
     }
+
+    addChangeEvent(func: (event: JQuery.ChangeEvent<HTMLElement, null, HTMLElement, HTMLElement>) => Promise<any>) {
+        this.changeEventFunctions.push(func);
+    }
+
     getCurrentAnswerFromHtml() {
         var result: {
             position: string;
@@ -67,5 +74,4 @@ export class BlankFillingQuestionHelper implements IQuestionHelper {
             return 0;
         });
     }
-
 }

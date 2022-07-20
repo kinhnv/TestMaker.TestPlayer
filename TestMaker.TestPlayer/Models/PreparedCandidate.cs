@@ -16,6 +16,8 @@ namespace TestMaker.TestPlayer.Models
 
         public int EventContentQuestionType { get; set; }
 
+        public int EventMarkingType { get; set; }
+
         public Guid CandidateId { get; set; }
 
         public string CandidateCode { get; set; }

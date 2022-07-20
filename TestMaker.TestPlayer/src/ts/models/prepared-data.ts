@@ -6,6 +6,7 @@ export interface IPreparedData {
     eventCode: string;
     eventScopeType: number;
     eventContentQuestionType: number;
+    eventMarkingType: number;
     candidateId: string;
     candidateCode: string;
     test: IPreparedTest
