@@ -9,6 +9,8 @@ export interface ICandidateAnswer {
     questionId: string;
     answerAsJson: string;
     status: number;
+    correntAnswerAsJson: string;
+    rationalesAsJson: string;
 }
 
 export enum CandidateAnswerStatus {

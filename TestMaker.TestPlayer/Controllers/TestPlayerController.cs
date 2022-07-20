@@ -23,42 +23,55 @@ namespace TestMaker.TestPlayer.Controllers
             return View();
         }
 
+        [HttpGet]
+        [Route("GetCandidateStatus")]
+        public async Task<IActionResult> GetCandidate(Guid candidateId)
+        {
+            var candidate = await _servicesHelper.GetAsync<CandidateForDetails>
+            (
+                $"api/Event/Candidates/GetCandidate",
+                new Dictionary<string, object>
+                {
+                    { "candidateId", candidateId }
+                }
+            );
+
+            return Ok(candidate.Status);
+        }
+
         [HttpPost]
         public async Task<IActionResult> GetPreparedCandidateByCode(PrepareCode code)
         {
-            var candidate = await _servicesHelper
-                .GetAsync<PreparedCandidate>
-                (
-                    $"api/Event/Events/GetPreparedCandidateByCode",
-                    new Dictionary<string, object>
-                    {
-                        { "eventCode", code.EventCode },
-                        { "candidateCode", code.CandidateCode }
-                    }
-                );
+            var candidate = await _servicesHelper.GetAsync<PreparedCandidate>
+            (
+                $"api/Event/Events/GetPreparedCandidateByCode",
+                new Dictionary<string, object>
+                {
+                    { "eventCode", code.EventCode },
+                    { "candidateCode", code.CandidateCode }
+                }
+            );
 
-            var test = await _servicesHelper
-                .GetAsync<PreparedTestWithoutRank>
-                (
-                    $"api/Event/Candidates/GetPreparedTestTemp",
-                    new Dictionary<string, object>
-                    {
-                        { "candidateId", candidate.CandidateId }
-                    }
-                );
+            var test = await _servicesHelper.GetAsync<PreparedTestWithoutRank>
+            (
+                $"api/Event/Candidates/GetPreparedTestTemp",
+                new Dictionary<string, object>
+                {
+                    { "candidateId", candidate.CandidateId }
+                }
+            );
 
             if (test == null)
             {
-                var originTest = await _servicesHelper
-                    .GetAsync<PreparedTest>
-                    (
-                        $"api/Test/Tests/PrepareTest",
-                        new Dictionary<string, object>
-                        {
-                            { "testId", candidate.TestId },
-                            { "eventContentQuestionType", candidate.EventContentQuestionType }
-                        }
-                    );
+                var originTest = await _servicesHelper.GetAsync<PreparedTest>
+                (
+                    $"api/Test/Tests/PrepareTest",
+                    new Dictionary<string, object>
+                    {
+                        { "testId", candidate.TestId },
+                        { "eventContentQuestionType", candidate.EventContentQuestionType }
+                    }
+                );
 
                 if (candidate.EventContentQuestionType == 4)
                 {
@@ -135,7 +148,7 @@ namespace TestMaker.TestPlayer.Controllers
         [Route("GetAnswer")]
         public async Task<IActionResult> GetAnswerAsync(Guid candidateId, Guid questionId)
         {
-            var candidateAnswer = await _servicesHelper.GetAsync<CandidateAnswer>
+            var candidateAnswer = await _servicesHelper.GetAsync<CandidateAnswerWithCorrentAnswer>
             (
                 $"api/Event/Candidates/GetAnswer",
                 new Dictionary<string, object>
@@ -145,22 +158,53 @@ namespace TestMaker.TestPlayer.Controllers
                 }
             );
 
+            if (candidateAnswer.Status == 2)
+            {
+                var correctAnswer = await _servicesHelper
+                    .GetAsync<CorrectAnswer>
+                    (
+                        $"api/Test/Tests/GetCorrectAnswer",
+                        new Dictionary<string, object>
+                        {
+                        { "questionId", questionId }
+                        }
+                    );
+
+                candidateAnswer.CorrentAnswerAsJson = correctAnswer.AnswerAsJson;
+                candidateAnswer.RationalesAsJson = correctAnswer.RationalesAsJson;
+            }
+
             return Ok(candidateAnswer);
+        }
+
+        [HttpGet]
+        [Route("GetCorrectAnswer")]
+        public async Task<IActionResult> GetCorrectAnswerAsync(Guid questionId)
+        {
+            var answers = await _servicesHelper.GetAsync<IEnumerable<CorrectAnswer>>
+            (
+                $"api/Test/Tests/GetCorrectAnswer",
+                new Dictionary<string, object>
+                {
+                    { "questionId", questionId }
+                }
+            );
+
+            return Ok(answers);
         }
 
         [HttpGet]
         [Route("GetAnswers")]
         public async Task<IActionResult> GetAnswersAsync(Guid candidateId)
         {
-            var answers = await _servicesHelper
-                .GetAsync<IEnumerable<CandidateAnswer>>
-                (
-                    $"api/Event/Candidates/GetAnswers",
-                    new Dictionary<string, object>
-                    {
-                        { "candidateId", candidateId }
-                    }
-                );
+            var answers = await _servicesHelper.GetAsync<IEnumerable<CandidateAnswer>>
+            (
+                $"api/Event/Candidates/GetAnswers",
+                new Dictionary<string, object>
+                {
+                    { "candidateId", candidateId }
+                }
+            );
 
             return Ok(answers);
         }
@@ -184,7 +228,7 @@ namespace TestMaker.TestPlayer.Controllers
 
         [HttpPost]
         [Route("SubmitQuestion")]
-        public async Task<IActionResult> SubmitQuestionAsync(Guid candidateId, Guid questionId, string answerAsJson)
+        public async Task<IActionResult> SubmitQuestionAsync(Guid candidateId, Guid questionId, string answerAsJson, int? candidateAnswerStatus = null, bool marking = false)
         {
             await _servicesHelper.PostAsync
                 (
@@ -194,9 +238,28 @@ namespace TestMaker.TestPlayer.Controllers
                     {
                         candidateId = candidateId,
                         questionId = questionId,
-                        answerAsJson = answerAsJson
+                        answerAsJson = answerAsJson,
+                        candidateAnswerStatus = candidateAnswerStatus,
+                        marking = marking
                     }
                 );
+
+            if (!string.IsNullOrEmpty(AccessToken))
+            {
+                if (answerAsJson != null && marking == true && candidateAnswerStatus == 3)
+                {
+                    await _servicesHelper.PostAsync
+                        (
+                            $"api/Test/Tests/SaveAnswer",
+                            null,
+                            new
+                            {
+                                answerAsJson = answerAsJson,
+                                questionId = questionId
+                            }
+                        );
+                }
+            }
 
             return Ok();
         }
@@ -206,35 +269,31 @@ namespace TestMaker.TestPlayer.Controllers
         public async Task<IActionResult> SubmitAsync(Guid candidateId)
         {
             await _servicesHelper.PostAsync
-                   (
-                       $"api/Event/Candidates/Submit",
-                       parameters: new Dictionary<string, object>
-                       {
-                           { "candidateId" ,candidateId }
-                       }
-                   );
-
-            if (!string.IsNullOrEmpty(AccessToken))
-            {
-                var answers = await _servicesHelper
-                    .GetAsync<IEnumerable<CandidateAnswer>>
-                    (
-                        $"api/Event/Candidates/GetAnswers",
-                        new Dictionary<string, object>
-                        {
-                        { "candidateId", candidateId }
-                        }
-                    );
-
-                if (answers?.Any() == true)
+            (
+                $"api/Event/Candidates/Submit",
+                parameters: new Dictionary<string, object>
                 {
-                    await _servicesHelper.PostAsync
-                        (
-                            $"api/Test/Tests/SaveAnswers",
-                            null,
-                            answers
-                        );
+                    { "candidateId", candidateId }
                 }
+            );
+
+            var answers = await _servicesHelper.GetAsync<IEnumerable<CandidateAnswer>>
+            (
+                $"api/Event/Candidates/GetAnswers",
+                new Dictionary<string, object>
+                {
+                    { "candidateId", candidateId }
+                }
+            );
+
+            if (!string.IsNullOrEmpty(AccessToken) && answers?.Any() == true)
+            {
+                await _servicesHelper.PostAsync
+                (
+                    $"api/Test/Tests/SaveAnswers",
+                    null,
+                    answers
+                );
             }
 
             return Ok();

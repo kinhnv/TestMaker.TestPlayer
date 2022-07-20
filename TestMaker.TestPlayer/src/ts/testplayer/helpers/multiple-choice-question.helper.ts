@@ -19,28 +19,48 @@ export class MultipleChoiceQuestionHelper implements IQuestionHelper {
 
     renderQuestion(candidateAnswer: ICandidateAnswer) {
         let answers: string[] = candidateAnswer.answerAsJson ? JSON.parse(candidateAnswer.answerAsJson) : [];
+        let correctAnswers: string[] = candidateAnswer.correntAnswerAsJson ? JSON.parse(candidateAnswer.correntAnswerAsJson) : [];
+        let rationales: {
+            answer: string;
+            rationale: string;
+        }[] = candidateAnswer.rationalesAsJson ? JSON.parse(candidateAnswer.rationalesAsJson) : [];
+
         let answersAsHtml = '';
+        let isMarked = candidateAnswer.status == 2 ? true : false;
+        let inputStyle = 'float: left; height: 24px; width: 24px; margin-right: 10px; box-shadow: none;';
+        let type = this.questionContent.isSingleChoice ? 'radio' : 'checkbox'
         this.questionContent.answers.forEach((a, i) => {
-            if (answers.indexOf(a) >= 0 && answers.length) {
-                answersAsHtml += `
-                <div class="form-group">
-                    <input class="js__answer" 
-                        type="${this.questionContent.isSingleChoice ? 'radio' : 'checkbox'}" 
-                        style="float: left; height: 24px; width: 24px; margin-right: 10px; box-shadow: none;"
-                        value="${a}" checked="checked" name="answer" class="form-control" id="answer_${i}"/> 
-                    <span for="answer_${i}">${a}</span>
-                </div>`
+            let isCandidateAnswer = answers.indexOf(a) >= 0 && answers.length;
+            let isCorrectAnswer = correctAnswers.indexOf(a) >= 0 && correctAnswers.length;
+            let labelStyle = "cursor: pointer; width: calc(100% - 34px);"
+            if (isMarked) {
+                if (isCorrectAnswer) {
+                    labelStyle += " color: green;"
+                }
+                else {
+                    if (isCandidateAnswer) {
+                        labelStyle += " color: red;"
+                    }
+                }
             }
-            else {
-                answersAsHtml += `
-                <div class="form-group">
-                    <input class="js__answer" 
-                        type="${this.questionContent.isSingleChoice ? 'radio' : 'checkbox'}" 
-                        style="float: left; height: 24px; width: 24px; margin-right: 10px; box-shadow: none;"
-                        value="${a}" name="answer" class="form-control" id="answer_${i}"/>
-                    <span for="answer_${i}">${a}</span>
-                </div>`
+
+            let rationaleText = '';
+            let rationale = rationales.find(x => x.answer == a);
+            if (rationale) {
+                rationaleText = rationale.rationale;
             }
+
+            answersAsHtml += `
+                <div class="form-group ${isMarked ? 'js__show-rationale' : ''}">
+                    <input class="js__answer"
+                        type="${type}" 
+                        style="${inputStyle}"
+                        value="${a}" ${isCandidateAnswer ? 'checked="checked"' : ''} name="answer" class="form-control" id="answer_${i}" ${isMarked ? 'disabled' : ''}/>
+                    <label style="${labelStyle}" for="answer_${i}">${a}</label>
+                    <div class="js__show-rationale-content" style="display: none;">
+                        ${rationaleText}
+                    </div>
+                </div>`
         });
 
         this.params.$content.html(`
@@ -58,7 +78,14 @@ export class MultipleChoiceQuestionHelper implements IQuestionHelper {
             this.changeEventFunctions.forEach(func => {
                 func(event);
             })
-        })
+        });
+
+        $('.js__show-rationale').click(event => {
+            $('.js__question-rationale-modal-content').html($(event.currentTarget).find('.js__show-rationale-content').html());
+            if ((<any>$('#js__question-rationale-modal')).modal) {
+                (<any>$('#js__question-rationale-modal')).modal('show');
+            }
+        });
     }
 
     addChangeEvent(func: (event: JQuery.ChangeEvent<HTMLElement, null, HTMLElement, HTMLElement>) => Promise<any>) {

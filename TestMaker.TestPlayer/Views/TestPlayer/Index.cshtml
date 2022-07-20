@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "TestPlayer";
 }
 
@@ -28,8 +27,25 @@
             <div class="js__media"></div>
             <div class="js__container" style="margin: 0px auto;">
             </div>
+            <div class="js__question-status"></div>
         </div>
     </main>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="js__question-rationale-modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body js__question-rationale-modal-content">
+
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
@@ -42,6 +58,7 @@
             submitQuestionUrl = Url.Action("SubmitQuestion"),
             getCorrectAnswersUrl = Url.Action("GetCorrectAnswers"),
             submitUrl = Url.Action("Submit"),
-            clearUrl = Url.Action("Clear")
+            clearUrl = Url.Action("Clear"),
+            getCandidateUrl = Url.Action("GetCandidate")
         })" type="text/javascript" src="~/js/testplayer.js"></script>
 }

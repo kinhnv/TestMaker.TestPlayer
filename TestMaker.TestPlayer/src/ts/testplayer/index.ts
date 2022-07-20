@@ -19,6 +19,7 @@ interface ITestPlayerControllerParams {
     submitUrl: string;
     saveQuestionResultUrl: string;
     clearUrl: string;
+    getCandidateUrl: string;
 }
 
 class TestPlayerController {
@@ -117,7 +118,6 @@ class TestPlayerController {
                 }
             }).then((data: IPreparedData) => {
                 this.data = data;
-                console.log(data.eventMarkingType);
                 if (data) {
                     $('.js__test-name').html(data.test.name);
                     if (this.isSummary) {
@@ -129,6 +129,12 @@ class TestPlayerController {
                 }
             });
 
+            $('.js__submit-question').click((event) => {
+                this.submitCurrentQuestion().then(() => {
+                    this.renderCurrentQuestion();
+                    $('.js__submit-question').hide();
+                });
+            });
             $('.js__next-question').click((event) => {
                 this.submitCurrentQuestion().then(() => {
                     location.href = this.getQuestionHerf(this.nextQuestion.questionId);
@@ -210,6 +216,16 @@ class TestPlayerController {
             })
         });
 
+        this.questionHelper.addChangeEvent((event) => {
+            return new Promise((resole, reject) => {
+                var currentStatus = $('.js__question-status').attr('question-status');
+                if (currentStatus == 'seen') {
+                    currentStatus = 'doing';
+                }
+                $('.js__question-status').attr('question-status', currentStatus);
+            });
+        });
+
         this.getCurrentAnswerFromServer().then(candidateAnswer => {
             if (currentQuestion.media) {
                 $('.js__media').html(`
@@ -219,8 +235,13 @@ class TestPlayerController {
                     </audio>
                 `);
             }
-            if (candidateAnswer.status != CandidateAnswerStatus.Done) {
-            }
+
+            var questionStatus = candidateAnswer.status == 0 ? 'seen' :
+                candidateAnswer.status == 1 || candidateAnswer.status == 3 ? 'doing' :
+                    candidateAnswer.status == 2 ? 'marked' : '';
+
+            $('.js__question-status').attr('question-status', questionStatus);
+
             this.questionHelper.renderQuestion(candidateAnswer);
         })
     }
@@ -241,6 +262,8 @@ class TestPlayerController {
     }
 
     private submitCurrentQuestion(): Promise<void> {
+        var questionStatus = $('.js__question-status').attr('question-status');
+
         return new Promise<void>((resolve, reject) => {
             let answer = this.getCurrentAnswerAsJson();
             if (answer) {
@@ -250,7 +273,11 @@ class TestPlayerController {
                     data: {
                         candidateId: this.candidateId,
                         questionId: this.currentQuestion.questionId,
-                        answerAsJson: answer
+                        answerAsJson: answer,
+                        candidateAnswerStatus: questionStatus == 'seen' ? 1 :
+                            questionStatus == 'doing' ? 3 :
+                                questionStatus == 'marked' ? 2 : null,
+                        marking: this.data.eventMarkingType == 2 ? true : false
                     }
                 }).then(() => {
                     resolve()
