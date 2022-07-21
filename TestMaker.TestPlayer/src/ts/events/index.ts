@@ -42,7 +42,7 @@ class EventsController {
             function createCandidateUI(prepareData: IPreparedData) {
                 let isInServer = prepareData.test == null;
                 return `<span class="js__candidate js__candidate-${prepareData.candidateCode}" data-candidate-code="${prepareData.candidateCode}">
-                            ${prepareData.candidateCode} (${isInServer ? 'Server' : 'Client'}) - 
+                            ${prepareData.candidateCode} - 
                             <a class="btn btn-outline-primary btn-sm js__join-event" style="cursor: pointer"
                                 data-event-code="${prepareData.eventCode}" data-candidate-code="${prepareData.candidateCode}">
                                 Tham gia
@@ -68,7 +68,7 @@ class EventsController {
                     $('.js__events').append(`
                         <tr class="js__event js__event-${prepareData.eventCode}" data-event-code="${prepareData.eventCode}">
                             <td style="text-align: left; width: 200px; line-height: 30px">
-                                ${isPublic ? prepareData.eventName : prepareData.eventCode} (${ isPublic ? 'Public' : 'Private' })
+                                ${isPublic ? prepareData.eventName : prepareData.eventCode}
                             </td>
                             <td style="text-align: left;">
                                 ${ hasCandidate ? `<span class="js__candidates">

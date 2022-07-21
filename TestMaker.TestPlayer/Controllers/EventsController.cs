@@ -38,6 +38,7 @@ namespace TestMaker.TestPlayer.Controllers
                 {
                     EventId = candidate.EventId,
                     EventCode = candidate.EventCode,
+                    EventName = candidate.EventName,
                     EventScopeType = candidate.EventScopeType,
                     EventMarkingType = candidate.EventMarkingType,
                     CandidateCode = candidate.CandidateCode,

@@ -11,6 +11,8 @@ namespace TestMaker.TestPlayer.Models
 
         public string EventCode { get; set; }
 
+        public string EventName { get; set; }
+
         public int EventScopeType { get; set; }
 
         public int EventMarkingType { get; set; }

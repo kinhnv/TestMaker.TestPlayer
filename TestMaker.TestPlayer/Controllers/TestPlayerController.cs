@@ -25,7 +25,7 @@ namespace TestMaker.TestPlayer.Controllers
 
         [HttpGet]
         [Route("GetCandidateStatus")]
-        public async Task<IActionResult> GetCandidate(Guid candidateId)
+        public async Task<IActionResult> GetCandidateStatusAsync([FromQuery]Guid candidateId)
         {
             var candidate = await _servicesHelper.GetAsync<CandidateForDetails>
             (
@@ -244,23 +244,6 @@ namespace TestMaker.TestPlayer.Controllers
                     }
                 );
 
-            if (!string.IsNullOrEmpty(AccessToken))
-            {
-                if (answerAsJson != null && marking == true && candidateAnswerStatus == 3)
-                {
-                    await _servicesHelper.PostAsync
-                        (
-                            $"api/Test/Tests/SaveAnswer",
-                            null,
-                            new
-                            {
-                                answerAsJson = answerAsJson,
-                                questionId = questionId
-                            }
-                        );
-                }
-            }
-
             return Ok();
         }
 
@@ -319,7 +302,7 @@ namespace TestMaker.TestPlayer.Controllers
         {
             get
             {
-                HttpContext.Request.Cookies.TryGetValue("accessToken", out string accessToken);
+                HttpContext.Request.Cookies.TryGetValue("ACCESS_TOKEN", out string accessToken);
 
                 return accessToken;
             }
