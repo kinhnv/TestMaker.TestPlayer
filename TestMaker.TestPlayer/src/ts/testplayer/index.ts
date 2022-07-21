@@ -19,7 +19,7 @@ interface ITestPlayerControllerParams {
     submitUrl: string;
     saveQuestionResultUrl: string;
     clearUrl: string;
-    getCandidateUrl: string;
+    getCandidateStatusUrl: string;
 }
 
 class TestPlayerController {
@@ -327,14 +327,14 @@ class TestPlayerController {
                 html += `
                     <div>
                         <div>
-                            <h3>Section 1</h3>
+                            <h3>${section.name}</h3>
                         </div>
                         <div>
                             ${questionsAsHtml}
                         </div>
                     </div>
                     <div style="text-align: center">
-                        <a class="btn btn-light js__submit" style="cursor: pointer">Nộp bài kiểm tra</a>
+                        <a class="btn btn-light js__submit" style="cursor: pointer;display: none;">Nộp bài kiểm tra</a>
                         <a class="btn btn-light js__close" style="cursor: pointer">Thoát bài kiếm tra</a>
                     </div>`
             });
@@ -350,6 +350,22 @@ class TestPlayerController {
                 location.href = this.params.homeUrl
             });
 
+
+            $.ajax({
+                method: 'GET',
+                url: this.params.getCandidateStatusUrl,
+                data: {
+                    candidateId: this.candidateId
+                }
+            }).then((status) => {
+                if (status == 3) {
+                    this.mark();
+                }
+                else {
+                    $('.js__submit').show();
+                }
+            })
+
             $('.js__submit').click((event) => {
                 $.ajax({
                     method: 'POST',
@@ -359,6 +375,7 @@ class TestPlayerController {
                     }
                 }).then(() => {
                     this.mark();
+                    $('.js__submit').hide();
                 })
             });
         })
